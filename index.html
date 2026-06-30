@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Strava Running Dashboard</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    header {
+      background: #fc4c02;
+      color: white;
+      padding: 24px;
+      text-align: center;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background: #222;
+      color: white;
+    }
+
+    tr:hover {
+      background: #f2f2f2;
+    }
+
+    .error {
+      background: #ffe6e6;
+      color: #900;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Strava Running Dashboard</h1>
+    <p>Personal running data pulled from the Strava API</p>
+    <p>Some data is misleading or incorrect due to my smart watch uploading duplicate runs to Strava.</p>
+  </header>
+
+  <main>
+    <div id="errorMessage" class="error"></div>
+
+    <section class="stats">
+      <div class="card">
+        <h2>Total Runs</h2>
+        <p id="totalRuns">--</p>
+      </div>
+
+      <div class="card">
+        <h2>Total Miles</h2>
+        <p id="totalMiles">--</p>
+      </div>
+
+      <div class="card">
+        <h2>Longest Run</h2>
+        <p id="longestRun">--</p>
+      </div>
+
+      <div class="card">
+        <h2>Average Pace</h2>
+        <p id="averagePace">--</p>
+      </div>
+    </section>
+
+    <h2>Recent Runs</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Run Name</th>
+          <th>Distance</th>
+          <th>Pace</th>
+          <th>Heart Rate</th>
+          <th>Elevation</th>
+        </tr>
+      </thead>
+
+      <tbody id="runsTableBody">
+        <!-- JavaScript will insert rows here -->
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    // Load running data from runs.json in the same folder as this HTML file
+    async function loadRunData() {
+      try {
+        const response = await fetch("runs.json");
+
+        if (!response.ok) {
+          throw new Error("Could not load runs.json");
+        }
+
+        const runs = await response.json();
+
+        displayStats(runs);
+        displayRecentRuns(runs);
+      } catch (error) {
+        const errorBox = document.getElementById("errorMessage");
+        errorBox.style.display = "block";
+        errorBox.textContent =
+          "Could not load running data. Make sure runs.json is in the same folder as index.html.";
+      }
+    }
+
+    // Convert a pace string like "8:34" into total seconds
+    function paceToSeconds(pace) {
+      if (!pace || pace === "0:00") return 0;
+
+      const parts = pace.split(":");
+      const minutes = Number(parts[0]);
+      const seconds = Number(parts[1]);
+
+      return minutes * 60 + seconds;
+    }
+
+    // Convert total seconds back into a pace string
+    function secondsToPace(totalSeconds) {
+      if (!totalSeconds || totalSeconds <= 0) return "--";
+
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = Math.round(totalSeconds % 60);
+
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    }
+
+    // Display the summary stat cards at the top
+    function displayStats(runs) {
+      const totalRuns = runs.length;
+
+      const totalMiles = runs.reduce((sum, run) => {
+        return sum + Number(run.distance_miles || 0);
+      }, 0);
+
+      const longestRun = runs.reduce((max, run) => {
+        return Math.max(max, Number(run.distance_miles || 0));
+      }, 0);
+
+      const validPaces = runs
+        .map(run => paceToSeconds(run.average_pace))
+        .filter(seconds => seconds > 0);
+
+      const averagePaceSeconds =
+        validPaces.reduce((sum, seconds) => sum + seconds, 0) / validPaces.length;
+
+      document.getElementById("totalRuns").textContent = totalRuns;
+      document.getElementById("totalMiles").textContent = totalMiles.toFixed(1);
+      document.getElementById("longestRun").textContent = longestRun.toFixed(1) + " mi";
+      document.getElementById("averagePace").textContent =
+        secondsToPace(averagePaceSeconds) + " /mi";
+    }
+
+    // Display the 100 most recent runs in the table
+    function displayRecentRuns(runs) {
+      const tableBody = document.getElementById("runsTableBody");
+
+      const recentRuns = runs
+        .slice()
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 100);
+
+      recentRuns.forEach(run => {
+        const row = document.createElement("tr");
+const date = run.date
+  ? new Date(run.date).toLocaleDateString()
+  : "--";
+
+const heartRate =
+  run.average_heartrate !== null && run.average_heartrate !== undefined
+    ? Math.round(run.average_heartrate) + " bpm"
+    : "--";
+
+row.innerHTML = `
+  <td>${date}</td>
+  <td>${run.name || "Unnamed Run"}</td>
+  <td>${Number(run.distance_miles || 0).toFixed(2)} mi</td>
+  <td>${run.average_pace || "--"} /mi</td>
+  <td>${heartRate}</td>
+  <td>${Number(run.elevation_gain_ft || 0).toFixed(0)} ft</td>
+`;
+        tableBody.appendChild(row);
+      });
+    }
+
+    loadRunData();
+  </script>
+</body>
+</html>

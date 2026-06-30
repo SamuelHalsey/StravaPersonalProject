@@ -220,6 +220,12 @@ if __name__ == "__main__":
 
     #Save the cleaned run data locally as both a CSV and JSON file
     run_df.to_csv("runs.csv")
-    run_df.to_json("runs.json", orient="records", date_format="iso")
-
+  #Minor reformatting to make json file more readable
+    run_df.reset_index().to_json("runs.json", orient="records", date_format="iso")
+    run_df.reset_index().to_json(
+    "runs.json",
+    orient="records",
+    date_format="iso",
+    indent=4
+)
     print("\nSaved run data to runs.csv and runs.json.")
