@@ -8,6 +8,7 @@ import os
 import requests
 #pandas to organize and sort data
 import pandas as pd
+import json
 
 #dotenv lets Python load variables from a local .env file
 from dotenv import load_dotenv
@@ -194,8 +195,113 @@ def process_all_runs(all_activities):
 
     return df
 
+#Creates summary of total mileage, weekly mileage, and monthly mileage.
+def create_run_summary(run_df):
+    print("DEBUG: Entered create_run_summary()")
 
+    #If there are no runs, return empty summary values
+    if run_df.empty:
+        return {
+            "total_runs": 0,
+            "total_miles": 0,
+            "longest_run": 0,
+            "average_pace": "--",
+            "average_heartrate": None,
+            "weekly_mileage": [],
+            "monthly_mileage": []
+        }
 
+    #Make a copy so we do not modify the original DataFrame
+    df = run_df.copy()
+
+    #Move the date index back into a normal column
+    df = df.reset_index()
+
+    #Rename index column to date if needed
+    if "index" in df.columns and "date" not in df.columns:
+        df.rename(columns={"index": "date"}, inplace=True)
+
+    df["date"] = pd.to_datetime(df["date"], errors="coerce", utc=True)
+
+    #Remove timezone information so Pandas can safely group by week/month
+    df["date"] = df["date"].dt.tz_convert(None)
+
+    #Remove rows with invalid dates
+    df = df.dropna(subset=["date"])
+
+    print("DEBUG: Date cleanup complete")
+
+    #Basic totals
+    total_runs = len(df)
+    total_miles = df["distance_miles"].sum()
+    longest_run = df["distance_miles"].max()
+
+    #Average heart rate, ignoring missing values
+    average_heartrate = df["average_heartrate"].dropna().mean()
+
+    print("DEBUG: Basic totals complete")
+
+    #Weighted average pace based on total time divided by total distance
+    total_minutes = df["moving_time_min"].sum()
+
+    if total_miles > 0:
+        avg_minutes_per_mile = total_minutes / total_miles
+        pace_minutes = int(avg_minutes_per_mile)
+        pace_seconds = int((avg_minutes_per_mile - pace_minutes) * 60)
+        average_pace = f"{pace_minutes}:{pace_seconds:02d}"
+    else:
+        average_pace = "--"
+
+    print("DEBUG: Average pace complete")
+
+   
+    #Create week and month labels as simple strings.
+#This avoids Pandas timezone/month-conversion issues and works cleanly with JSON.
+
+    #Calculate Monday of the same week
+    df["week_start"] = df["date"] - pd.to_timedelta(df["date"].dt.weekday, unit="D")
+
+    #Convert week start to YYYY-MM-DD text
+    df["week_start"] = df["week_start"].dt.strftime("%Y-%m-%d")
+
+    #Convert month to YYYY-MM-01 text
+    df["month"] = df["date"].dt.strftime("%Y-%m-01")
+
+    print("DEBUG: Week/month columns created")
+    #Group by week
+    weekly_mileage_df = (
+        df.groupby("week_start", as_index=False)["distance_miles"]
+        .sum()
+        .rename(columns={"distance_miles": "miles"})
+    )
+
+    #Group by month
+    monthly_mileage_df = (
+        df.groupby("month", as_index=False)["distance_miles"]
+        .sum()
+        .rename(columns={"distance_miles": "miles"})
+    )
+
+    print("DEBUG: Grouping complete")
+
+    #Round mileage values
+    weekly_mileage_df["miles"] = weekly_mileage_df["miles"].round(2)
+    monthly_mileage_df["miles"] = monthly_mileage_df["miles"].round(2)
+
+    #Build one summary dictionary for the website
+    summary = {
+        "total_runs": int(total_runs),
+        "total_miles": round(float(total_miles), 2),
+        "longest_run": round(float(longest_run), 2),
+        "average_pace": average_pace,
+        "average_heartrate": round(float(average_heartrate), 0) if not pd.isna(average_heartrate) else None,
+        "weekly_mileage": weekly_mileage_df.to_dict(orient="records"),
+        "monthly_mileage": monthly_mileage_df.to_dict(orient="records")
+    }
+
+    print("DEBUG: Summary dictionary created")
+
+    return summary
 #Function gets a new access token then downloads all activities, filters runs, and returns clean run data.
 def get_and_process_all_runs():
     #Request a fresh access token before calling the Strava activity API
@@ -208,24 +314,45 @@ def get_and_process_all_runs():
     run_df = process_all_runs(all_activities)
 
     return run_df
-
-
 if __name__ == "__main__":
+    print("STEP 1: Starting script")
+
     #Download and process all Strava runs
     run_df = get_and_process_all_runs()
+    print("STEP 2: Finished get_and_process_all_runs()")
 
-    #Print the most recent runs in the terminal
+    print("Run DataFrame shape:", run_df.shape)
+    print("Run DataFrame columns:", run_df.columns.tolist())
+
+    #Create summary statistics for the dashboard
+    run_summary = create_run_summary(run_df)
+    print("STEP 3: Finished create_run_summary()")
+
+    #Print the 10 most recent runs in the terminal
     print("\n=== Your Most Recent Runs ===")
     print(run_df[["name", "distance_miles", "average_pace", "average_heartrate"]].tail(10))
+    print("STEP 4: Printed recent runs")
 
-    #Save the cleaned run data locally as both a CSV and JSON file
+    #Save the cleaned run data locally as a CSV file
     run_df.to_csv("runs.csv")
-  #Minor reformatting to make json file more readable
-    run_df.reset_index().to_json("runs.json", orient="records", date_format="iso")
-    run_df.reset_index().to_json(
-    "runs.json",
-    orient="records",
-    date_format="iso",
-    indent=4
-)
-    print("\nSaved run data to runs.csv and runs.json.")
+    print("STEP 5: Saved runs.csv")
+
+    #Reset the index so the date is included as a normal JSON field
+    run_df_for_json = run_df.reset_index()
+    print("STEP 6: Reset index")
+
+    #Save cleaned run data as readable JSON for the website
+    run_df_for_json.to_json(
+        "runs.json",
+        orient="records",
+        date_format="iso",
+        indent=4
+    )
+    print("STEP 7: Saved runs.json")
+
+    #Save summary statistics as readable JSON for the website
+    with open("summary.json", "w", encoding="utf-8") as file:
+        json.dump(run_summary, file, indent=4, default=str)
+    print("STEP 8: Saved summary.json")
+
+    print("\nSaved run data to runs.csv, runs.json, and summary.json.")

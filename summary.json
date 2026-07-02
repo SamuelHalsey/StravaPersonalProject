@@ -1,0 +1,399 @@
+{
+    "total_runs": 170,
+    "total_miles": 763.7,
+    "longest_run": 26.58,
+    "average_pace": "9:32",
+    "average_heartrate": 135.0,
+    "weekly_mileage": [
+        {
+            "week_start": "2020-05-18",
+            "miles": 6.02
+        },
+        {
+            "week_start": "2021-06-07",
+            "miles": 6.5
+        },
+        {
+            "week_start": "2021-06-14",
+            "miles": 8.3
+        },
+        {
+            "week_start": "2021-06-21",
+            "miles": 14.2
+        },
+        {
+            "week_start": "2021-06-28",
+            "miles": 4.3
+        },
+        {
+            "week_start": "2021-07-05",
+            "miles": 11.2
+        },
+        {
+            "week_start": "2021-07-12",
+            "miles": 9.0
+        },
+        {
+            "week_start": "2021-07-19",
+            "miles": 5.0
+        },
+        {
+            "week_start": "2021-07-26",
+            "miles": 8.2
+        },
+        {
+            "week_start": "2021-08-02",
+            "miles": 4.1
+        },
+        {
+            "week_start": "2024-08-19",
+            "miles": 5.27
+        },
+        {
+            "week_start": "2024-09-23",
+            "miles": 4.3
+        },
+        {
+            "week_start": "2024-09-30",
+            "miles": 3.98
+        },
+        {
+            "week_start": "2024-10-07",
+            "miles": 2.89
+        },
+        {
+            "week_start": "2024-10-14",
+            "miles": 4.28
+        },
+        {
+            "week_start": "2024-10-21",
+            "miles": 2.06
+        },
+        {
+            "week_start": "2024-10-28",
+            "miles": 1.6
+        },
+        {
+            "week_start": "2024-11-04",
+            "miles": 2.8
+        },
+        {
+            "week_start": "2024-11-11",
+            "miles": 11.06
+        },
+        {
+            "week_start": "2024-11-25",
+            "miles": 6.94
+        },
+        {
+            "week_start": "2024-12-02",
+            "miles": 4.75
+        },
+        {
+            "week_start": "2024-12-09",
+            "miles": 3.0
+        },
+        {
+            "week_start": "2024-12-16",
+            "miles": 1.57
+        },
+        {
+            "week_start": "2024-12-23",
+            "miles": 6.14
+        },
+        {
+            "week_start": "2024-12-30",
+            "miles": 6.78
+        },
+        {
+            "week_start": "2025-01-13",
+            "miles": 4.03
+        },
+        {
+            "week_start": "2025-01-20",
+            "miles": 3.01
+        },
+        {
+            "week_start": "2025-01-27",
+            "miles": 8.58
+        },
+        {
+            "week_start": "2025-02-03",
+            "miles": 12.37
+        },
+        {
+            "week_start": "2025-02-10",
+            "miles": 5.15
+        },
+        {
+            "week_start": "2025-02-17",
+            "miles": 4.2
+        },
+        {
+            "week_start": "2025-03-10",
+            "miles": 2.62
+        },
+        {
+            "week_start": "2025-03-17",
+            "miles": 6.12
+        },
+        {
+            "week_start": "2025-03-24",
+            "miles": 2.26
+        },
+        {
+            "week_start": "2025-03-31",
+            "miles": 10.27
+        },
+        {
+            "week_start": "2025-04-07",
+            "miles": 4.78
+        },
+        {
+            "week_start": "2025-04-14",
+            "miles": 4.51
+        },
+        {
+            "week_start": "2025-04-21",
+            "miles": 4.92
+        },
+        {
+            "week_start": "2025-04-28",
+            "miles": 4.56
+        },
+        {
+            "week_start": "2025-05-05",
+            "miles": 3.75
+        },
+        {
+            "week_start": "2025-05-12",
+            "miles": 1.5
+        },
+        {
+            "week_start": "2025-05-19",
+            "miles": 2.0
+        },
+        {
+            "week_start": "2025-06-23",
+            "miles": 3.0
+        },
+        {
+            "week_start": "2025-06-30",
+            "miles": 17.53
+        },
+        {
+            "week_start": "2025-07-07",
+            "miles": 12.53
+        },
+        {
+            "week_start": "2025-07-14",
+            "miles": 14.83
+        },
+        {
+            "week_start": "2025-07-21",
+            "miles": 23.04
+        },
+        {
+            "week_start": "2025-07-28",
+            "miles": 25.57
+        },
+        {
+            "week_start": "2025-08-04",
+            "miles": 9.02
+        },
+        {
+            "week_start": "2025-08-11",
+            "miles": 26.87
+        },
+        {
+            "week_start": "2025-08-18",
+            "miles": 23.22
+        },
+        {
+            "week_start": "2025-08-25",
+            "miles": 60.53
+        },
+        {
+            "week_start": "2025-09-01",
+            "miles": 32.3
+        },
+        {
+            "week_start": "2025-09-08",
+            "miles": 59.16
+        },
+        {
+            "week_start": "2025-09-15",
+            "miles": 42.78
+        },
+        {
+            "week_start": "2025-09-22",
+            "miles": 36.33
+        },
+        {
+            "week_start": "2025-09-29",
+            "miles": 12.14
+        },
+        {
+            "week_start": "2025-10-06",
+            "miles": 8.2
+        },
+        {
+            "week_start": "2025-10-13",
+            "miles": 26.58
+        },
+        {
+            "week_start": "2025-11-17",
+            "miles": 7.69
+        },
+        {
+            "week_start": "2025-11-24",
+            "miles": 8.2
+        },
+        {
+            "week_start": "2026-01-12",
+            "miles": 6.04
+        },
+        {
+            "week_start": "2026-01-19",
+            "miles": 5.05
+        },
+        {
+            "week_start": "2026-02-23",
+            "miles": 6.31
+        },
+        {
+            "week_start": "2026-03-30",
+            "miles": 10.59
+        },
+        {
+            "week_start": "2026-04-06",
+            "miles": 9.0
+        },
+        {
+            "week_start": "2026-04-13",
+            "miles": 8.23
+        },
+        {
+            "week_start": "2026-04-20",
+            "miles": 8.09
+        },
+        {
+            "week_start": "2026-04-27",
+            "miles": 18.8
+        },
+        {
+            "week_start": "2026-05-11",
+            "miles": 6.5
+        },
+        {
+            "week_start": "2026-05-18",
+            "miles": 3.62
+        },
+        {
+            "week_start": "2026-06-29",
+            "miles": 3.09
+        }
+    ],
+    "monthly_mileage": [
+        {
+            "month": "2020-05-01",
+            "miles": 6.02
+        },
+        {
+            "month": "2021-06-01",
+            "miles": 33.3
+        },
+        {
+            "month": "2021-07-01",
+            "miles": 33.4
+        },
+        {
+            "month": "2021-08-01",
+            "miles": 4.1
+        },
+        {
+            "month": "2024-08-01",
+            "miles": 5.27
+        },
+        {
+            "month": "2024-09-01",
+            "miles": 7.07
+        },
+        {
+            "month": "2024-10-01",
+            "miles": 12.04
+        },
+        {
+            "month": "2024-11-01",
+            "miles": 17.82
+        },
+        {
+            "month": "2024-12-01",
+            "miles": 22.81
+        },
+        {
+            "month": "2025-01-01",
+            "miles": 14.0
+        },
+        {
+            "month": "2025-02-01",
+            "miles": 25.73
+        },
+        {
+            "month": "2025-03-01",
+            "miles": 11.0
+        },
+        {
+            "month": "2025-04-01",
+            "miles": 24.48
+        },
+        {
+            "month": "2025-05-01",
+            "miles": 11.81
+        },
+        {
+            "month": "2025-06-01",
+            "miles": 6.45
+        },
+        {
+            "month": "2025-07-01",
+            "miles": 69.88
+        },
+        {
+            "month": "2025-08-01",
+            "miles": 139.8
+        },
+        {
+            "month": "2025-09-01",
+            "miles": 170.57
+        },
+        {
+            "month": "2025-10-01",
+            "miles": 46.92
+        },
+        {
+            "month": "2025-11-01",
+            "miles": 15.89
+        },
+        {
+            "month": "2026-01-01",
+            "miles": 11.09
+        },
+        {
+            "month": "2026-03-01",
+            "miles": 8.86
+        },
+        {
+            "month": "2026-04-01",
+            "miles": 38.53
+        },
+        {
+            "month": "2026-05-01",
+            "miles": 23.76
+        },
+        {
+            "month": "2026-06-01",
+            "miles": 3.09
+        }
+    ]
+}
