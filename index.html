@@ -85,6 +85,42 @@
       margin-bottom: 20px;
       display: none;
     }
+    .chart-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 80px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.bar-label {
+  font-weight: bold;
+}
+
+.bar-container {
+  background: #e6e6e6;
+  height: 22px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bar {
+  background: #fc4c02;
+  height: 100%;
+  border-radius: 12px;
+}
+
+.bar-value {
+  text-align: right;
+}
   </style>
 </head>
 
@@ -119,7 +155,15 @@
         <p id="averagePace">--</p>
       </div>
     </section>
+<h2>Weekly Mileage</h2>
+<div class="chart-card">
+  <div id="weeklyMileage"></div>
+</div>
 
+<h2>Monthly Mileage</h2>
+<div class="chart-card">
+  <div id="monthlyMileage"></div>
+</div>
     <h2>Recent Runs</h2>
 
     <table>
@@ -141,28 +185,10 @@
   </main>
 
   <script>
-    // Load running data from runs.json in the same folder as this HTML file
-    async function loadRunData() {
-      try {
-        const response = await fetch("runs.json");
+    //Load running data from runs.json in the same folder as this HTML file
 
-        if (!response.ok) {
-          throw new Error("Could not load runs.json");
-        }
 
-        const runs = await response.json();
-
-        displayStats(runs);
-        displayRecentRuns(runs);
-      } catch (error) {
-        const errorBox = document.getElementById("errorMessage");
-        errorBox.style.display = "block";
-        errorBox.textContent =
-          "Could not load running data. Make sure runs.json is in the same folder as index.html.";
-      }
-    }
-
-    // Convert a pace string like "8:34" into total seconds
+    //Convert a pace string like "8:34" into total seconds
     function paceToSeconds(pace) {
       if (!pace || pace === "0:00") return 0;
 
@@ -172,8 +198,127 @@
 
       return minutes * 60 + seconds;
     }
+    //Format YYYY-MM-DD strings into a short readable date
+function formatShortDate(dateString) {
+  const date = new Date(dateString);
 
-    // Convert total seconds back into a pace string
+  if (isNaN(date)) {
+    return "--";
+  }
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric"
+  });
+}
+
+//Display weekly mileage as simple horizontal bars
+function displayWeeklyMileage(weeklyMileage) {
+  const container = document.getElementById("weeklyMileage");
+
+  if (!weeklyMileage || weeklyMileage.length === 0) {
+    container.textContent = "No weekly mileage data available.";
+    return;
+  }
+
+  container.innerHTML = "";
+
+  //Show the most recent 8 weeks
+  const recentWeeks = weeklyMileage.slice(-8);
+
+  const maxMiles = Math.max(...recentWeeks.map(week => Number(week.miles)));
+
+  recentWeeks.forEach(week => {
+    const miles = Number(week.miles);
+    const widthPercent = maxMiles > 0 ? (miles / maxMiles) * 100 : 0;
+
+    const row = document.createElement("div");
+    row.className = "bar-row";
+
+    row.innerHTML = `
+      <div class="bar-label">${formatShortDate(week.week_start)}</div>
+      <div class="bar-container">
+        <div class="bar" style="width: ${widthPercent}%"></div>
+      </div>
+      <div class="bar-value">${miles.toFixed(1)} mi</div>
+    `;
+
+    container.appendChild(row);
+  });
+}
+
+//Display monthly mileage as simple horizontal bars
+function displayMonthlyMileage(monthlyMileage) {
+  const container = document.getElementById("monthlyMileage");
+
+  if (!monthlyMileage || monthlyMileage.length === 0) {
+    container.textContent = "No monthly mileage data available.";
+    return;
+  }
+
+  container.innerHTML = "";
+
+  //Show the most recent 6 months
+  const recentMonths = monthlyMileage.slice(-6);
+
+  const maxMiles = Math.max(...recentMonths.map(month => Number(month.miles)));
+
+  recentMonths.forEach(month => {
+    const miles = Number(month.miles);
+    const widthPercent = maxMiles > 0 ? (miles / maxMiles) * 100 : 0;
+
+    const date = new Date(month.month);
+
+    const label = isNaN(date)
+      ? "--"
+      : date.toLocaleDateString(undefined, {
+          month: "short",
+          year: "numeric"
+        });
+
+    const row = document.createElement("div");
+    row.className = "bar-row";
+
+    row.innerHTML = `
+      <div class="bar-label">${label}</div>
+      <div class="bar-container">
+        <div class="bar" style="width: ${widthPercent}%"></div>
+      </div>
+      <div class="bar-value">${miles.toFixed(1)} mi</div>
+    `;
+
+    container.appendChild(row);
+  });
+}
+//Load running data and summary statistics from local JSON files
+async function loadRunData() {
+  try {
+    const runsResponse = await fetch("runs.json");
+    const summaryResponse = await fetch("summary.json");
+
+    if (!runsResponse.ok) {
+      throw new Error("Could not load runs.json");
+    }
+
+    if (!summaryResponse.ok) {
+      throw new Error("Could not load summary.json");
+    }
+
+    const runs = await runsResponse.json();
+    const summary = await summaryResponse.json();
+
+    displayStats(summary);
+    displayWeeklyMileage(summary.weekly_mileage);
+    displayMonthlyMileage(summary.monthly_mileage);
+    displayRecentRuns(runs);
+  } catch (error) {
+    const errorBox = document.getElementById("errorMessage");
+    errorBox.style.display = "block";
+    errorBox.textContent =
+      "Could not load running data. Make sure runs.json and summary.json are in the same folder as index.html.";
+  }
+}
+    //Convert total seconds back into a pace string
     function secondsToPace(totalSeconds) {
       if (!totalSeconds || totalSeconds <= 0) return "--";
 
@@ -183,63 +328,50 @@
       return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     }
 
-    // Display the summary stat cards at the top
-    function displayStats(runs) {
-      const totalRuns = runs.length;
+  //Display the summary stat cards at the top using summary.json
+function displayStats(summary) {
+  document.getElementById("totalRuns").textContent = summary.total_runs;
+  document.getElementById("totalMiles").textContent = Number(summary.total_miles).toFixed(1);
+  document.getElementById("longestRun").textContent = Number(summary.longest_run).toFixed(1) + " mi";
+  document.getElementById("averagePace").textContent = summary.average_pace + " /mi";
+}
 
-      const totalMiles = runs.reduce((sum, run) => {
-        return sum + Number(run.distance_miles || 0);
-      }, 0);
+   //Display the 100 most recent runs in the table
+function displayRecentRuns(runs) {
+  const tableBody = document.getElementById("runsTableBody");
 
-      const longestRun = runs.reduce((max, run) => {
-        return Math.max(max, Number(run.distance_miles || 0));
-      }, 0);
+  //Clear old table rows before adding new ones
+  tableBody.innerHTML = "";
 
-      const validPaces = runs
-        .map(run => paceToSeconds(run.average_pace))
-        .filter(seconds => seconds > 0);
+  const recentRuns = runs
+    .slice()
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 100);
 
-      const averagePaceSeconds =
-        validPaces.reduce((sum, seconds) => sum + seconds, 0) / validPaces.length;
+  recentRuns.forEach(run => {
+    const row = document.createElement("tr");
 
-      document.getElementById("totalRuns").textContent = totalRuns;
-      document.getElementById("totalMiles").textContent = totalMiles.toFixed(1);
-      document.getElementById("longestRun").textContent = longestRun.toFixed(1) + " mi";
-      document.getElementById("averagePace").textContent =
-        secondsToPace(averagePaceSeconds) + " /mi";
-    }
+    const date = run.date
+      ? new Date(run.date).toLocaleDateString()
+      : "--";
 
-    // Display the 100 most recent runs in the table
-    function displayRecentRuns(runs) {
-      const tableBody = document.getElementById("runsTableBody");
+    const heartRate =
+      run.average_heartrate !== null && run.average_heartrate !== undefined
+        ? Math.round(run.average_heartrate) + " bpm"
+        : "--";
 
-      const recentRuns = runs
-        .slice()
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 100);
+    row.innerHTML = `
+      <td>${date}</td>
+      <td>${run.name || "Unnamed Run"}</td>
+      <td>${Number(run.distance_miles || 0).toFixed(2)} mi</td>
+      <td>${run.average_pace || "--"} /mi</td>
+      <td>${heartRate}</td>
+      <td>${Number(run.elevation_gain_ft || 0).toFixed(0)} ft</td>
+    `;
 
-      recentRuns.forEach(run => {
-        const row = document.createElement("tr");
-const date = run.date
-  ? new Date(run.date).toLocaleDateString()
-  : "--";
-
-const heartRate =
-  run.average_heartrate !== null && run.average_heartrate !== undefined
-    ? Math.round(run.average_heartrate) + " bpm"
-    : "--";
-
-row.innerHTML = `
-  <td>${date}</td>
-  <td>${run.name || "Unnamed Run"}</td>
-  <td>${Number(run.distance_miles || 0).toFixed(2)} mi</td>
-  <td>${run.average_pace || "--"} /mi</td>
-  <td>${heartRate}</td>
-  <td>${Number(run.elevation_gain_ft || 0).toFixed(0)} ft</td>
-`;
-        tableBody.appendChild(row);
-      });
-    }
+    tableBody.appendChild(row);
+  });
+}
 
     loadRunData();
   </script>
