@@ -3,7 +3,7 @@
 #Started: 6/29/2026
 
 import os
-
+import math
 #requests lets Python make HTTP requests to the Strava API
 import requests
 #pandas to organize and sort data
@@ -195,10 +195,21 @@ def process_all_runs(all_activities):
 
     return df
 
-#Creates summary of total mileage, weekly mileage, and monthly mileage.
-def create_run_summary(run_df):
-    print("DEBUG: Entered create_run_summary()")
+#Converts NaN values into None so Json puts in none
+def clean_for_json(value):
+    if isinstance(value, float) and math.isnan(value):
+        return None
 
+    if isinstance(value, dict):
+        return {key: clean_for_json(item) for key, item in value.items()}
+
+    if isinstance(value, list):
+        return [clean_for_json(item) for item in value]
+
+    return value
+#Creates summary data for the running dashboard.
+#Includes weekly training load and monthly training trends.
+def create_run_summary(run_df):
     #If there are no runs, return empty summary values
     if run_df.empty:
         return {
@@ -208,40 +219,50 @@ def create_run_summary(run_df):
             "average_pace": "--",
             "average_heartrate": None,
             "weekly_mileage": [],
-            "monthly_mileage": []
+            "monthly_mileage": [],
+            "weekly_summary": {
+                "current_week_miles": 0,
+                "previous_week_miles": 0,
+                "four_week_average_miles": 0,
+                "highest_mileage_week": {
+                    "week_start": "--",
+                    "miles": 0
+                }
+            },
+            "monthly_summary": []
         }
 
-    #Make a copy so we do not modify the original DataFrame
+    #Make a copy so the original DataFrame is not modified
     df = run_df.copy()
 
-    #Move the date index back into a normal column
+    #Move date index back into a normal column
     df = df.reset_index()
 
     #Rename index column to date if needed
     if "index" in df.columns and "date" not in df.columns:
         df.rename(columns={"index": "date"}, inplace=True)
 
+    #Convert Strava date values into datetime objects
     df["date"] = pd.to_datetime(df["date"], errors="coerce", utc=True)
 
-    #Remove timezone information so Pandas can safely group by week/month
+    #Remove timezone information to make grouping easier
     df["date"] = df["date"].dt.tz_convert(None)
 
     #Remove rows with invalid dates
     df = df.dropna(subset=["date"])
 
-    print("DEBUG: Date cleanup complete")
+    #Create week and month labels as strings for clean JSON output
+    df["week_start"] = df["date"] - pd.to_timedelta(df["date"].dt.weekday, unit="D")
+    df["week_start"] = df["week_start"].dt.strftime("%Y-%m-%d")
+    df["month"] = df["date"].dt.strftime("%Y-%m-01")
 
-    #Basic totals
+    #Basic all-time totals
     total_runs = len(df)
     total_miles = df["distance_miles"].sum()
     longest_run = df["distance_miles"].max()
-
-    #Average heart rate, ignoring missing values
     average_heartrate = df["average_heartrate"].dropna().mean()
 
-    print("DEBUG: Basic totals complete")
-
-    #Weighted average pace based on total time divided by total distance
+    #Overall weighted average pace
     total_minutes = df["moving_time_min"].sum()
 
     if total_miles > 0:
@@ -252,43 +273,80 @@ def create_run_summary(run_df):
     else:
         average_pace = "--"
 
-    print("DEBUG: Average pace complete")
-
-   
-    #Create week and month labels as simple strings.
-#This avoids Pandas timezone/month-conversion issues and works cleanly with JSON.
-
-    #Calculate Monday of the same week
-    df["week_start"] = df["date"] - pd.to_timedelta(df["date"].dt.weekday, unit="D")
-
-    #Convert week start to YYYY-MM-DD text
-    df["week_start"] = df["week_start"].dt.strftime("%Y-%m-%d")
-
-    #Convert month to YYYY-MM-01 text
-    df["month"] = df["date"].dt.strftime("%Y-%m-01")
-
-    print("DEBUG: Week/month columns created")
-    #Group by week
+    #Weekly mileage totals
     weekly_mileage_df = (
         df.groupby("week_start", as_index=False)["distance_miles"]
         .sum()
         .rename(columns={"distance_miles": "miles"})
     )
 
-    #Group by month
-    monthly_mileage_df = (
-        df.groupby("month", as_index=False)["distance_miles"]
-        .sum()
-        .rename(columns={"distance_miles": "miles"})
+    weekly_mileage_df["miles"] = weekly_mileage_df["miles"].round(2)
+    weekly_mileage_df = weekly_mileage_df.sort_values("week_start")
+
+    #Weekly training load summary cards
+    current_week_miles = (
+        float(weekly_mileage_df.iloc[-1]["miles"])
+        if len(weekly_mileage_df) >= 1
+        else 0
     )
 
-    print("DEBUG: Grouping complete")
+    previous_week_miles = (
+        float(weekly_mileage_df.iloc[-2]["miles"])
+        if len(weekly_mileage_df) >= 2
+        else 0
+    )
 
-    #Round mileage values
-    weekly_mileage_df["miles"] = weekly_mileage_df["miles"].round(2)
-    monthly_mileage_df["miles"] = monthly_mileage_df["miles"].round(2)
+    four_week_average_miles = (
+        weekly_mileage_df["miles"].tail(4).mean()
+        if len(weekly_mileage_df) > 0
+        else 0
+    )
 
-    #Build one summary dictionary for the website
+    highest_week_row = weekly_mileage_df.loc[weekly_mileage_df["miles"].idxmax()]
+
+    weekly_summary = {
+        "current_week_miles": round(current_week_miles, 2),
+        "previous_week_miles": round(previous_week_miles, 2),
+        "four_week_average_miles": round(float(four_week_average_miles), 2),
+        "highest_mileage_week": {
+            "week_start": highest_week_row["week_start"],
+            "miles": round(float(highest_week_row["miles"]), 2)
+        }
+    }
+
+    #Monthly training trend data
+    monthly_summary_df = (
+        df.groupby("month", as_index=False)
+        .agg(
+            miles=("distance_miles", "sum"),
+            runs=("id", "count"),
+            moving_time_min=("moving_time_min", "sum"),
+            average_heartrate=("average_heartrate", "mean")
+        )
+    )
+
+    #Calculate weighted average pace per month
+    monthly_summary_df["average_pace"] = monthly_summary_df.apply(
+        lambda row: "--"
+        if row["miles"] <= 0
+        else f"{int(row['moving_time_min'] / row['miles'])}:"
+             f"{int(((row['moving_time_min'] / row['miles']) - int(row['moving_time_min'] / row['miles'])) * 60):02d}",
+        axis=1
+    )
+
+    #Round monthly values
+    monthly_summary_df["miles"] = monthly_summary_df["miles"].round(2)
+    monthly_summary_df["average_heartrate"] = monthly_summary_df["average_heartrate"].round(0)
+
+    #Remove moving_time_min from final monthly output
+    monthly_summary_df = monthly_summary_df[
+        ["month", "miles", "runs", "average_pace", "average_heartrate"]
+    ]
+
+    #Simple monthly mileage list for any future chart use
+    monthly_mileage_df = monthly_summary_df[["month", "miles"]].copy()
+
+    #Build final summary dictionary for the website
     summary = {
         "total_runs": int(total_runs),
         "total_miles": round(float(total_miles), 2),
@@ -296,10 +354,10 @@ def create_run_summary(run_df):
         "average_pace": average_pace,
         "average_heartrate": round(float(average_heartrate), 0) if not pd.isna(average_heartrate) else None,
         "weekly_mileage": weekly_mileage_df.to_dict(orient="records"),
-        "monthly_mileage": monthly_mileage_df.to_dict(orient="records")
+        "monthly_mileage": monthly_mileage_df.to_dict(orient="records"),
+        "weekly_summary": weekly_summary,
+        "monthly_summary": monthly_summary_df.to_dict(orient="records")
     }
-
-    print("DEBUG: Summary dictionary created")
 
     return summary
 #Function gets a new access token then downloads all activities, filters runs, and returns clean run data.
@@ -314,45 +372,35 @@ def get_and_process_all_runs():
     run_df = process_all_runs(all_activities)
 
     return run_df
+
 if __name__ == "__main__":
-    print("STEP 1: Starting script")
+    print("Downloading and processing Strava runs...")
 
-    #Download and process all Strava runs
+    # Download and process all Strava runs
     run_df = get_and_process_all_runs()
-    print("STEP 2: Finished get_and_process_all_runs()")
 
-    print("Run DataFrame shape:", run_df.shape)
-    print("Run DataFrame columns:", run_df.columns.tolist())
-
-    #Create summary statistics for the dashboard
+    # Create summary statistics for the dashboard
     run_summary = create_run_summary(run_df)
-    print("STEP 3: Finished create_run_summary()")
 
-    #Print the 10 most recent runs in the terminal
-    print("\n=== Your Most Recent Runs ===")
-    print(run_df[["name", "distance_miles", "average_pace", "average_heartrate"]].tail(10))
-    print("STEP 4: Printed recent runs")
+    # Clean NaN values before writing JSON
+    run_summary = clean_for_json(run_summary)
 
-    #Save the cleaned run data locally as a CSV file
+    # Save the cleaned run data locally as a CSV file
     run_df.to_csv("runs.csv")
-    print("STEP 5: Saved runs.csv")
 
-    #Reset the index so the date is included as a normal JSON field
+    # Reset the index so the date is included as a normal JSON field
     run_df_for_json = run_df.reset_index()
-    print("STEP 6: Reset index")
 
-    #Save cleaned run data as readable JSON for the website
+    # Save cleaned run data as readable JSON for the website
     run_df_for_json.to_json(
         "runs.json",
         orient="records",
         date_format="iso",
         indent=4
     )
-    print("STEP 7: Saved runs.json")
 
-    #Save summary statistics as readable JSON for the website
+    # Save summary statistics as readable JSON for the website
     with open("summary.json", "w", encoding="utf-8") as file:
-        json.dump(run_summary, file, indent=4, default=str)
-    print("STEP 8: Saved summary.json")
+        json.dump(run_summary, file, indent=4, default=str, allow_nan=False)
 
-    print("\nSaved run data to runs.csv, runs.json, and summary.json.")
+    print("Saved run data to runs.csv, runs.json, and summary.json.")

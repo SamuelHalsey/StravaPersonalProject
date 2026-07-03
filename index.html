@@ -121,6 +121,55 @@
 .bar-value {
   text-align: right;
 }
+.monthly-table {
+  margin-bottom: 30px;
+}
+.goal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.goal-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.goal-card h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: #555;
+}
+
+.goal-card p {
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.progress-container {
+  background: #e6e6e6;
+  height: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-bar {
+  background: #fc4c02;
+  height: 100%;
+  width: 0%;
+  border-radius: 12px;
+}
+
+.progress-percent {
+  margin-top: 10px;
+  font-size: 14px !important;
+  color: #555;
+}
   </style>
 </head>
 
@@ -134,36 +183,72 @@
   <main>
     <div id="errorMessage" class="error"></div>
 
-    <section class="stats">
-      <div class="card">
-        <h2>Total Runs</h2>
-        <p id="totalRuns">--</p>
-      </div>
+    <h2>Weekly Training Load</h2>
 
-      <div class="card">
-        <h2>Total Miles</h2>
-        <p id="totalMiles">--</p>
-      </div>
+<section class="stats">
+  <div class="card">
+    <h2>Current Week</h2>
+    <p id="currentWeekMiles">--</p>
+  </div>
 
-      <div class="card">
-        <h2>Longest Run</h2>
-        <p id="longestRun">--</p>
-      </div>
+  <div class="card">
+    <h2>Previous Week</h2>
+    <p id="previousWeekMiles">--</p>
+  </div>
 
-      <div class="card">
-        <h2>Average Pace</h2>
-        <p id="averagePace">--</p>
-      </div>
-    </section>
+  <div class="card">
+    <h2>4-Week Avg</h2>
+    <p id="fourWeekAverageMiles">--</p>
+  </div>
+
+  <div class="card">
+    <h2>Highest Week</h2>
+    <p id="highestMileageWeek">--</p>
+  </div>
+</section>
+<h2>Goal Progress</h2>
+
+<section class="goal-grid">
+  <div class="goal-card">
+    <h2>Monthly Goal Progress</h2>
+    <p id="monthlyGoalText">--</p>
+    <div class="progress-container">
+      <div id="monthlyGoalBar" class="progress-bar"></div>
+    </div>
+    <p class="progress-percent" id="monthlyGoalPercent">--</p>
+  </div>
+
+  <div class="goal-card">
+    <h2>Weekly Goal Progress</h2>
+    <p id="weeklyGoalText">--</p>
+    <div class="progress-container">
+      <div id="weeklyGoalBar" class="progress-bar"></div>
+    </div>
+    <p class="progress-percent" id="weeklyGoalPercent">--</p>
+  </div>
+</section>
 <h2>Weekly Mileage</h2>
 <div class="chart-card">
   <div id="weeklyMileage"></div>
 </div>
 
-<h2>Monthly Mileage</h2>
-<div class="chart-card">
-  <div id="monthlyMileage"></div>
-</div>
+<h2>Monthly Training Trends</h2>
+
+<table class="monthly-table">
+  <thead>
+    <tr>
+      <th>Month</th>
+      <th>Miles</th>
+      <th>Runs</th>
+      <th>Avg Pace</th>
+      <th>Avg HR</th>
+    </tr>
+  </thead>
+
+  <tbody id="monthlySummaryTableBody">
+    <!-- JavaScript will insert monthly summary rows here -->
+  </tbody>
+</table>
     <h2>Recent Runs</h2>
 
     <table>
@@ -186,7 +271,11 @@
 
   <script>
     //Load running data from runs.json in the same folder as this HTML file
+    //Main mileage goal settings
+    const MONTHLY_MILE_GOAL = 40;
 
+// Weekly goal is based on the monthly goal divided by 4
+const WEEKLY_MILE_GOAL = MONTHLY_MILE_GOAL / 4;
 
     //Convert a pace string like "8:34" into total seconds
     function paceToSeconds(pace) {
@@ -307,10 +396,13 @@ async function loadRunData() {
     const runs = await runsResponse.json();
     const summary = await summaryResponse.json();
 
-    displayStats(summary);
+    displayWeeklyStats(summary.weekly_summary);
+    displayGoalProgress(summary.weekly_summary, summary.monthly_summary);
     displayWeeklyMileage(summary.weekly_mileage);
-    displayMonthlyMileage(summary.monthly_mileage);
+    displayMonthlySummary(summary.monthly_summary);
     displayRecentRuns(runs);
+
+
   } catch (error) {
     const errorBox = document.getElementById("errorMessage");
     errorBox.style.display = "block";
@@ -327,15 +419,102 @@ async function loadRunData() {
 
       return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     }
+// Display monthly and weekly goal progress
+function displayGoalProgress(weeklySummary, monthlySummary) {
+  if (!weeklySummary || !monthlySummary || monthlySummary.length === 0) {
+    return;
+  }
 
-  //Display the summary stat cards at the top using summary.json
-function displayStats(summary) {
-  document.getElementById("totalRuns").textContent = summary.total_runs;
-  document.getElementById("totalMiles").textContent = Number(summary.total_miles).toFixed(1);
-  document.getElementById("longestRun").textContent = Number(summary.longest_run).toFixed(1) + " mi";
-  document.getElementById("averagePace").textContent = summary.average_pace + " /mi";
+  // Get the most recent month from monthly_summary
+  const currentMonth = monthlySummary[monthlySummary.length - 1];
+
+  const currentMonthMiles = Number(currentMonth.miles || 0);
+  const currentWeekMiles = Number(weeklySummary.current_week_miles || 0);
+
+  const monthlyPercent = Math.min((currentMonthMiles / MONTHLY_MILE_GOAL) * 100, 100);
+  const weeklyPercent = Math.min((currentWeekMiles / WEEKLY_MILE_GOAL) * 100, 100);
+
+  document.getElementById("monthlyGoalText").textContent =
+    `${currentMonthMiles.toFixed(1)} / ${MONTHLY_MILE_GOAL.toFixed(1)} mi`;
+
+  document.getElementById("weeklyGoalText").textContent =
+    `${currentWeekMiles.toFixed(1)} / ${WEEKLY_MILE_GOAL.toFixed(1)} mi`;
+
+  document.getElementById("monthlyGoalBar").style.width = `${monthlyPercent}%`;
+  document.getElementById("weeklyGoalBar").style.width = `${weeklyPercent}%`;
+
+  document.getElementById("monthlyGoalPercent").textContent =
+    `${monthlyPercent.toFixed(0)}% of monthly goal`;
+
+  document.getElementById("weeklyGoalPercent").textContent =
+    `${weeklyPercent.toFixed(0)}% of weekly goal`;
 }
+  //Display the summary stat cards at the top using summary.json
+function displayWeeklyStats(weeklySummary) {
+  if (!weeklySummary) {
+    return;
+  }
 
+  document.getElementById("currentWeekMiles").textContent =
+    Number(weeklySummary.current_week_miles || 0).toFixed(1) + " mi";
+
+  document.getElementById("previousWeekMiles").textContent =
+    Number(weeklySummary.previous_week_miles || 0).toFixed(1) + " mi";
+
+  document.getElementById("fourWeekAverageMiles").textContent =
+    Number(weeklySummary.four_week_average_miles || 0).toFixed(1) + " mi";
+
+  const highestWeek = weeklySummary.highest_mileage_week;
+
+  document.getElementById("highestMileageWeek").textContent =
+    highestWeek
+      ? Number(highestWeek.miles || 0).toFixed(1) + " mi"
+      : "--";
+}
+function displayMonthlySummary(monthlySummary) {
+  const tableBody = document.getElementById("monthlySummaryTableBody");
+
+  if (!monthlySummary || monthlySummary.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="5">No monthly summary data available.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tableBody.innerHTML = "";
+
+  const recentMonths = monthlySummary.slice(-12).reverse();
+
+  recentMonths.forEach(monthData => {
+    const row = document.createElement("tr");
+
+    const date = new Date(monthData.month);
+
+    const monthLabel = isNaN(date)
+      ? "--"
+      : date.toLocaleDateString(undefined, {
+          month: "short",
+          year: "numeric"
+        });
+
+    const heartRate =
+      monthData.average_heartrate !== null && monthData.average_heartrate !== undefined
+        ? Math.round(monthData.average_heartrate) + " bpm"
+        : "--";
+
+    row.innerHTML = `
+      <td>${monthLabel}</td>
+      <td>${Number(monthData.miles || 0).toFixed(1)} mi</td>
+      <td>${monthData.runs || 0}</td>
+      <td>${monthData.average_pace || "--"} /mi</td>
+      <td>${heartRate}</td>
+    `;
+
+    tableBody.appendChild(row);
+  });
+}
    //Display the 100 most recent runs in the table
 function displayRecentRuns(runs) {
   const tableBody = document.getElementById("runsTableBody");
