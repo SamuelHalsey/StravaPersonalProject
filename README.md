@@ -84,5 +84,5 @@ The `.env` file is excluded from GitHub because it contains private Strava API c
 ## Future Improvements
 
 -Add pace trend charts
--Add heart-rate efficiency analysis, perhaps in regards to temperature
+-Add heart-rate efficiency analysis, perhaps I could map a correlation between heart rate, pace and temperature
 -Automate data refresh with GitHub Actions or AWS Lambda
