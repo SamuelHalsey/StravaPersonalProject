@@ -1,0 +1,71 @@
+name: Update Strava Dashboard Data
+
+on:
+  # Run automatically once per day at 1:15 PM Eastern.
+  schedule:
+    - cron: "15 13 * * *"
+      timezone: "America/New_York"
+
+  # Allows the workflow to be tested manually from the Actions tab.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Strava data pipeline
+        env:
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_ATHLETE_ID: ${{ secrets.STRAVA_ATHLETE_ID }}
+          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+        run: python StravaAPIfile.py
+
+      - name: Verify generated files
+        run: |
+          test -f runs.json
+          test -f summary.json
+          python -m json.tool runs.json > /dev/null
+          python -m json.tool summary.json > /dev/null
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      - name: Upload dashboard data to S3
+        run: |
+          aws s3 cp runs.json s3://sam-halsey.com/StravaProject/runs.json \
+            --content-type "application/json" \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+          aws s3 cp summary.json s3://sam-halsey.com/StravaProject/summary.json \
+            --content-type "application/json" \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths \
+              "/StravaProject/runs.json" \
+              "/StravaProject/summary.json"
