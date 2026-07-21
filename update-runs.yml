@@ -3,7 +3,7 @@ name: Update Strava Dashboard Data
 on:
   # Run automatically once per day at 1:15 PM Eastern.
   schedule:
-    - cron: "15 13 * * *"
+    - cron: "20 13 * * *"
       timezone: "America/New_York"
 
   # Allows the workflow to be tested manually from the Actions tab.
