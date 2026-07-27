@@ -6,8 +6,9 @@ on:
 
   workflow_dispatch:
 
-permissions:
-  contents: write
+concurrency:
+  group: strava-update
+  cancel-in-progress: true
 
 jobs:
   update-strava:
@@ -33,13 +34,35 @@ jobs:
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
         run: python StravaAPIfile.py
 
-      - name: Commit updated data
+      - name: Verify generated files
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          test -f runs.json
+          test -f summary.json
+          echo "Strava data files generated successfully"
 
-          git add runs.json summary.json
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
 
-          git diff --cached --quiet || git commit -m "Automatically update Strava data"
+      - name: Upload updated data to S3
+        run: |
+          aws s3 cp runs.json s3://sam-halsey.com/StravaProject/runs.json \
+            --content-type "application/json" \
+            --cache-control "no-cache"
 
-          git push
+          aws s3 cp summary.json s3://sam-halsey.com/StravaProject/summary.json \
+            --content-type "application/json" \
+            --cache-control "no-cache"
+
+      - name: Invalidate CloudFront cache
+        env:
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths \
+              "/StravaProject/runs.json" \
+              "/StravaProject/summary.json"
