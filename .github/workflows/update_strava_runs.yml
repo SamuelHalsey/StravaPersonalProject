@@ -1,32 +1,28 @@
-name: Update Strava Dashboard Data
+name: Update Strava Data
 
 on:
-  # Run automatically once per day at 2:42 PM Eastern.
   schedule:
-    - cron: "42 14 * * *"
-      timezone: "America/New_York"
+    - cron: "0 10 * * *"
 
-  # Allows the workflow to be tested manually from the Actions tab.
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  update-dashboard:
+  update-strava:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "pip"
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
       - name: Run Strava data pipeline
@@ -37,35 +33,13 @@ jobs:
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
         run: python StravaAPIfile.py
 
-      - name: Verify generated files
+      - name: Commit updated data
         run: |
-          test -f runs.json
-          test -f summary.json
-          python -m json.tool runs.json > /dev/null
-          python -m json.tool summary.json > /dev/null
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          git add runs.csv runs.json summary.json
 
-      - name: Upload dashboard data to S3
-        run: |
-          aws s3 cp runs.json s3://sam-halsey.com/StravaProject/runs.json \
-            --content-type "application/json" \
-            --cache-control "no-cache, no-store, must-revalidate"
+          git diff --cached --quiet || git commit -m "Automatically update Strava data"
 
-          aws s3 cp summary.json s3://sam-halsey.com/StravaProject/summary.json \
-            --content-type "application/json" \
-            --cache-control "no-cache, no-store, must-revalidate"
-
-      - name: Invalidate CloudFront cache
-        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }}
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
-            --paths \
-              "/StravaProject/runs.json" \
-              "/StravaProject/summary.json"
+          git push
