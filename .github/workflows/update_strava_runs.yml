@@ -1,4 +1,4 @@
-name: Update Strava Data
+name: Run Strava API
 
 on:
   schedule:
@@ -6,12 +6,8 @@ on:
 
   workflow_dispatch:
 
-concurrency:
-  group: strava-update
-  cancel-in-progress: true
-
 jobs:
-  update-strava:
+  run-strava-script:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,43 +22,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run Strava data pipeline
+      - name: Run StravaAPIfile.py
         env:
           STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
           STRAVA_ATHLETE_ID: ${{ secrets.STRAVA_ATHLETE_ID }}
           STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
         run: python StravaAPIfile.py
-
-      - name: Verify generated files
-        run: |
-          test -f runs.json
-          test -f summary.json
-          echo "Strava data files generated successfully"
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
-
-      - name: Upload updated data to S3
-        run: |
-          aws s3 cp runs.json s3://sam-halsey.com/StravaProject/runs.json \
-            --content-type "application/json" \
-            --cache-control "no-cache"
-
-          aws s3 cp summary.json s3://sam-halsey.com/StravaProject/summary.json \
-            --content-type "application/json" \
-            --cache-control "no-cache"
-
-      - name: Invalidate CloudFront cache
-        env:
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
-            --paths \
-              "/StravaProject/runs.json" \
-              "/StravaProject/summary.json"
