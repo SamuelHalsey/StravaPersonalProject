@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-08-05T13:37:13.000Z",
+        "id":19615784328,
+        "name":"Test",
+        "distance_miles":0.0564204868,
+        "moving_time_min":0.1166666667,
+        "elevation_gain_ft":0.0,
+        "average_speed_mps":12.976,
+        "average_pace":"2:04",
+        "average_heartrate":null
+    },
+    {
         "date":"2026-08-05T09:05:40.000Z",
         "id":19612809373,
         "name":"TD 3 Light vo2 max",
