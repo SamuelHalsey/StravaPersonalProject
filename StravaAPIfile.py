@@ -191,7 +191,7 @@ def process_all_runs(all_activities):
 
         #Sort oldest to newest so chronologically sorted runs
         df.set_index("date", inplace=True)
-        df.sort_index(inplace=True)
+        df.sort_index(ascending=False, inplace=True)
 
     return df
 
