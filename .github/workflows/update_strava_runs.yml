@@ -1,31 +1,62 @@
-name: Run Strava API
+name: Update Strava Data
 
 on:
+  # Run once per day at 10:00 UTC
   schedule:
-    - cron: "0 14 * * *"
+    - cron: "0 10 * * *"
 
+  # Allow manual runs from the Actions tab
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: update-strava-data
+  cancel-in-progress: false
+
 jobs:
-  run-strava-script:
+  update-strava:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run StravaAPIfile.py
+      - name: Run Strava data pipeline
         env:
           STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
           STRAVA_ATHLETE_ID: ${{ secrets.STRAVA_ATHLETE_ID }}
           STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
         run: python StravaAPIfile.py
+
+      - name: Commit updated data files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add runs.csv runs.json summary.json
+
+          if git diff --cached --quiet; then
+            echo "No Strava data changes detected."
+            exit 0
+          fi
+
+          git commit -m "Automatically update Strava data"
+
+          # Pull any repository changes made while this workflow was running
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+
+          git push origin "HEAD:${GITHUB_REF_NAME}"
