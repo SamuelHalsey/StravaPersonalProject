@@ -1,4 +1,4 @@
-name: Update Strava Data
+name: Update and Deploy Strava Dashboard
 
 on:
   # Run once per day at 10:00 UTC
@@ -10,30 +10,43 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 concurrency:
-  group: update-strava-data
+  group: update-and-deploy-strava
   cancel-in-progress: false
 
 jobs:
-  update-strava:
+  update-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # -----------------------------
+      # 1. Checkout repository
+      # -----------------------------
       - name: Check out repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # -----------------------------
+      # 2. Set up Python
+      # -----------------------------
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
 
+      # -----------------------------
+      # 3. Install Python dependencies
+      # -----------------------------
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # -----------------------------
+      # 4. Update Strava data
+      # -----------------------------
       - name: Run Strava data pipeline
         env:
           STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
@@ -42,6 +55,9 @@ jobs:
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
         run: python StravaAPIfile.py
 
+      # -----------------------------
+      # 5. Commit updated data
+      # -----------------------------
       - name: Commit updated data files
         run: |
           git config user.name "github-actions[bot]"
@@ -51,12 +67,43 @@ jobs:
 
           if git diff --cached --quiet; then
             echo "No Strava data changes detected."
-            exit 0
+          else
+            git commit -m "Automatically update Strava data"
+
+            # Incorporate any changes pushed while this job was running
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
 
-          git commit -m "Automatically update Strava data"
+      # -----------------------------
+      # 6. Authenticate with AWS
+      # -----------------------------
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::339712705777:role/GitHubStravaDashboardDeployRole
+          aws-region: us-east-2
 
-          # Pull any repository changes made while this workflow was running
-          git pull --rebase origin "${GITHUB_REF_NAME}"
+      # -----------------------------
+      # 7. Upload website to S3
+      # -----------------------------
+      - name: Deploy website files to S3
+        run: |
+          aws s3 sync . s3://sam-halsey.com/StravaProject \
+            --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude ".env" \
+            --exclude "*.py" \
+            --exclude "__pycache__/*" \
+            --exclude "requirements.txt"
 
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+      # -----------------------------
+      # 8. Clear CloudFront cache
+      # -----------------------------
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E271QTUSF8MWA2 \
+            --paths "/StravaProject/*"
