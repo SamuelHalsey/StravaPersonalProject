@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-08-23T12:40:06.000Z",
+        "id":19869251270,
+        "name":"TD 8: 8 Mile long run",
+        "distance_miles":8.0099071497,
+        "moving_time_min":78.8333333333,
+        "elevation_gain_ft":88.58268,
+        "average_speed_mps":2.725,
+        "average_pace":"9:50",
+        "average_heartrate":150.0
+    },
+    {
         "date":"2026-08-21T13:33:33.000Z",
         "id":19840419522,
         "name":"TD 7 mild run",
