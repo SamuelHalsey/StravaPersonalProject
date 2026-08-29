@@ -1,5 +1,27 @@
 [
     {
+        "date":"2026-08-29T09:47:06.000Z",
+        "id":19950476210,
+        "name":"TD 10: Long run pt 2",
+        "distance_miles":5.4457575811,
+        "moving_time_min":52.7666666667,
+        "elevation_gain_ft":70.53806,
+        "average_speed_mps":2.768,
+        "average_pace":"9:41",
+        "average_heartrate":137.8
+    },
+    {
+        "date":"2026-08-29T08:50:32.000Z",
+        "id":19949475663,
+        "name":"TD 10: Long Run pt 1",
+        "distance_miles":4.1111148102,
+        "moving_time_min":39.4,
+        "elevation_gain_ft":105.643048,
+        "average_speed_mps":2.799,
+        "average_pace":"9:34",
+        "average_heartrate":151.3
+    },
+    {
         "date":"2026-08-27T10:44:25.000Z",
         "id":19924048633,
         "name":"TD 9: Recovery run",
