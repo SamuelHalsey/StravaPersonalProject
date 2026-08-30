@@ -178,7 +178,7 @@ function displayWeeklyStats(weeklySummary) {
   setText("highestMileageWeek", `${highestMiles.toFixed(1)} mi`);
   setText(
     "highestMileageWeekDate",
-    highest.week_start ? `Week of ${formatShortDate(highest.week_start)}` : "All-time high"
+    highest.week_start ? `Week of ${(highest.week_start)}` : "All-time high"
   );
 
   const comparison = document.getElementById("currentWeekComparison");

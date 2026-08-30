@@ -49,7 +49,7 @@ def get_refresh_token(client_id, client_secret, code):
 
 
 #Uses the long term key to request a new short term key.
-#Strava access tokens expire quickly, so this function must run before making API calls.
+#Strava access tokens expire quickly so this function must run before making API calls.
 def get_new_token(client_id, client_secret, refresh_token):
     url = (
         "https://www.strava.com/oauth/token"
