@@ -1,5 +1,71 @@
 [
     {
+        "date":"2026-08-29T09:47:06.000Z",
+        "id":19950476210,
+        "name":"TD 10: Long run pt 2",
+        "distance_miles":5.4457575811,
+        "moving_time_min":52.7666666667,
+        "elevation_gain_ft":70.53806,
+        "average_speed_mps":2.768,
+        "average_pace":"9:41",
+        "average_heartrate":137.8
+    },
+    {
+        "date":"2026-08-29T08:50:32.000Z",
+        "id":19949475663,
+        "name":"TD 10: Long Run pt 1",
+        "distance_miles":4.1111148102,
+        "moving_time_min":39.4,
+        "elevation_gain_ft":105.643048,
+        "average_speed_mps":2.799,
+        "average_pace":"9:34",
+        "average_heartrate":151.3
+    },
+    {
+        "date":"2026-08-27T10:44:25.000Z",
+        "id":19924048633,
+        "name":"TD 9: Recovery run",
+        "distance_miles":4.0277889591,
+        "moving_time_min":39.75,
+        "elevation_gain_ft":75.131236,
+        "average_speed_mps":2.718,
+        "average_pace":"9:52",
+        "average_heartrate":143.6
+    },
+    {
+        "date":"2026-08-23T12:40:06.000Z",
+        "id":19869251270,
+        "name":"TD 8: 8 Mile long run",
+        "distance_miles":8.0099071497,
+        "moving_time_min":78.8333333333,
+        "elevation_gain_ft":88.58268,
+        "average_speed_mps":2.725,
+        "average_pace":"9:50",
+        "average_heartrate":150.0
+    },
+    {
+        "date":"2026-08-21T13:33:33.000Z",
+        "id":19840419522,
+        "name":"TD 7 mild run",
+        "distance_miles":3.0771534662,
+        "moving_time_min":29.5833333333,
+        "elevation_gain_ft":57.4147,
+        "average_speed_mps":2.79,
+        "average_pace":"9:36",
+        "average_heartrate":151.1
+    },
+    {
+        "date":"2026-08-20T08:13:44.000Z",
+        "id":19822919417,
+        "name":"TD 6 chiller run",
+        "distance_miles":3.0629240703,
+        "moving_time_min":28.9833333333,
+        "elevation_gain_ft":57.4147,
+        "average_speed_mps":2.835,
+        "average_pace":"9:27",
+        "average_heartrate":144.0
+    },
+    {
         "date":"2026-08-15T09:05:13.000Z",
         "id":19753307856,
         "name":"TD 5 satty long run",

@@ -43,14 +43,9 @@
     </header>
 
     <main class="dashboard">
-      <div id="errorMessage" class="error-message" role="alert"></div>
+      
 
-      <section class="notice" aria-label="Data quality note">
-        <div class="notice-icon" aria-hidden="true">i</div>
-        <p>
-          Historical totals may include duplicate activities created by prior smartwatch uploads.
-          The dashboard displays the data currently stored in Strava.
-        </p>
+       
       </section>
 
       <section class="section" aria-labelledby="overviewTitle">
@@ -59,9 +54,7 @@
             <p class="section-kicker">OVERVIEW</p>
             <h2 id="overviewTitle">Training at a glance</h2>
           </div>
-          <p class="section-description">
-            Current training load compared with recent and all-time performance.
-          </p>
+        
         </div>
 
         <div class="stats-grid">
@@ -161,24 +154,12 @@
             </div>
           </div>
 
-          <div class="goal-note">
-            Goals are configured in <code>script.js</code>.
-          </div>
+          
         </article>
       </section>
 
       <section class="section dashboard-grid" aria-label="Pace and training insights">
-        <article class="panel panel-large">
-          <div class="panel-heading">
-            <div>
-              <p class="section-kicker">PERFORMANCE</p>
-              <h2>Pace trend</h2>
-            </div>
-            <span class="panel-caption">Last 30 valid runs</span>
-          </div>
-
-          <div id="paceTrend" class="pace-chart" aria-label="Pace trend chart"></div>
-        </article>
+      
 
         <article class="panel">
           <div class="panel-heading">
@@ -213,60 +194,8 @@
         </article>
       </section>
 
-      <section class="section" aria-labelledby="monthTitle">
-        <div class="section-heading">
-          <div>
-            <p class="section-kicker">MONTHLY SUMMARY</p>
-            <h2 id="monthTitle">Current month</h2>
-          </div>
-          <p class="section-description">
-            Mileage, frequency, pace, and heart-rate trends by month.
-          </p>
-        </div>
-
-        <div class="current-month-card">
-          <div>
-            <p class="current-month-label" id="currentMonthLabel">Current month</p>
-            <p class="current-month-subtitle">Training summary</p>
-          </div>
-
-          <div class="current-month-metrics">
-            <div>
-              <span>Mileage</span>
-              <strong id="currentMonthMiles">--</strong>
-            </div>
-            <div>
-              <span>Runs</span>
-              <strong id="currentMonthRuns">--</strong>
-            </div>
-            <div>
-              <span>Avg pace</span>
-              <strong id="currentMonthPace">--</strong>
-            </div>
-            <div>
-              <span>Avg HR</span>
-              <strong id="currentMonthHeartRate">--</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="table-card">
-          <div class="table-scroll">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Month</th>
-                  <th>Miles</th>
-                  <th>Runs</th>
-                  <th>Avg Pace</th>
-                  <th>Avg HR</th>
-                </tr>
-              </thead>
-              <tbody id="monthlySummaryTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+        
+  
 
       <section class="section" aria-labelledby="runsTitle">
         <div class="section-heading recent-runs-heading">
