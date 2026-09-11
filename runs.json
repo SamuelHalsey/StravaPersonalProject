@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-09-10T18:14:26.000Z",
+        "id":20123190058,
+        "name":"TD 13: Vo2 max workout",
+        "distance_miles":4.0237500476,
+        "moving_time_min":37.05,
+        "elevation_gain_ft":84.317588,
+        "average_speed_mps":2.913,
+        "average_pace":"9:12",
+        "average_heartrate":146.4
+    },
+    {
         "date":"2026-09-05T08:14:00.000Z",
         "id":20047565877,
         "name":"TD 12: Long run",
