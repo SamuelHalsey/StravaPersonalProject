@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-09-16T14:55:56.000Z",
+        "id":20208755360,
+        "name":"TD 15: recovery \ud83d\ude0e",
+        "distance_miles":3.0278787459,
+        "moving_time_min":28.8333333333,
+        "elevation_gain_ft":57.086616,
+        "average_speed_mps":2.817,
+        "average_pace":"9:31",
+        "average_heartrate":145.0
+    },
+    {
         "date":"2026-09-12T10:33:49.000Z",
         "id":20146735582,
         "name":"TD 14: another 10 mile long run",
