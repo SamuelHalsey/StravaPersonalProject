@@ -1,6 +1,6 @@
 {
-    "total_runs": 169,
-    "total_miles": 714.89,
+    "total_runs": 170,
+    "total_miles": 718.91,
     "longest_run": 26.58,
     "average_pace": "9:35",
     "average_heartrate": 139.0,
@@ -335,7 +335,7 @@
         },
         {
             "week_start": "2026-09-21",
-            "miles": 3.05
+            "miles": 7.07
         }
     ],
     "monthly_mileage": [
@@ -449,13 +449,13 @@
         },
         {
             "month": "2026-09-01",
-            "miles": 33.17
+            "miles": 37.19
         }
     ],
     "weekly_summary": {
-        "current_week_miles": 3.05,
+        "current_week_miles": 7.07,
         "previous_week_miles": 3.03,
-        "four_week_average_miles": 8.29,
+        "four_week_average_miles": 9.3,
         "highest_mileage_week": {
             "week_start": "2025-08-25",
             "miles": 30.46
@@ -653,9 +653,9 @@
         },
         {
             "month": "2026-09-01",
-            "miles": 33.17,
-            "runs": 6,
-            "average_pace": "9:24",
+            "miles": 37.19,
+            "runs": 7,
+            "average_pace": "9:18",
             "average_heartrate": 143.0
         }
     ]
