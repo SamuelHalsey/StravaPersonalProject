@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-10-03T09:13:28.000Z",
+        "id":20434984017,
+        "name":"TD 20: Quality long run with J\ud83d\udcb4",
+        "distance_miles":10.5155857072,
+        "moving_time_min":95.0833333333,
+        "elevation_gain_ft":117.454072,
+        "average_speed_mps":2.966,
+        "average_pace":"9:02",
+        "average_heartrate":147.2
+    },
+    {
         "date":"2026-10-01T15:21:52.000Z",
         "id":20411646790,
         "name":"TD 19: Interval training (GONE WRONG\u203c\ufe0f \ud83d\ude31)",
