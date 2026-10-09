@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-10-08T17:51:22.000Z",
+        "id":20508522241,
+        "name":"TD 21: Workout Run",
+        "distance_miles":5.0006073967,
+        "moving_time_min":42.05,
+        "elevation_gain_ft":91.207352,
+        "average_speed_mps":3.19,
+        "average_pace":"8:24",
+        "average_heartrate":148.6
+    },
+    {
         "date":"2026-10-03T09:13:28.000Z",
         "id":20434984017,
         "name":"TD 20: Quality long run with J\ud83d\udcb4",
