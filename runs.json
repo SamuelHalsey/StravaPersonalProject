@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-10-11T11:09:21.000Z",
+        "id":20544386678,
+        "name":"TD 22: Long workout run to start taper \ud83d\ude0e",
+        "distance_miles":6.0014496664,
+        "moving_time_min":48.6166666667,
+        "elevation_gain_ft":131.561684,
+        "average_speed_mps":3.311,
+        "average_pace":"8:06",
+        "average_heartrate":149.8
+    },
+    {
         "date":"2026-10-08T17:51:22.000Z",
         "id":20508522241,
         "name":"TD 21: Workout Run",
