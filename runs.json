@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-10-15T11:57:43.000Z",
+        "id":20597751315,
+        "name":"TD 23: Chill-ish Run",
+        "distance_miles":3.0013462042,
+        "moving_time_min":27.3833333333,
+        "elevation_gain_ft":57.086616,
+        "average_speed_mps":2.94,
+        "average_pace":"9:07",
+        "average_heartrate":146.0
+    },
+    {
         "date":"2026-10-11T11:09:21.000Z",
         "id":20544386678,
         "name":"TD 22: Long workout run to start taper \ud83d\ude0e",
