@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-10-17T08:53:00.000Z",
+        "id":20621391189,
+        "name":"TD 24: Shakeout run with new shoes",
+        "distance_miles":1.9996340151,
+        "moving_time_min":18.9166666667,
+        "elevation_gain_ft":26.24672,
+        "average_speed_mps":2.835,
+        "average_pace":"9:27",
+        "average_heartrate":132.5
+    },
+    {
         "date":"2026-10-15T11:57:43.000Z",
         "id":20597751315,
         "name":"TD 23: Chill-ish Run",
