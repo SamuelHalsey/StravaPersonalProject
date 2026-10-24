@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-10-24T08:30:36.000Z",
+        "id":20712999868,
+        "name":"Morning Run SUB 1 HOUR 7 miler",
+        "distance_miles":7.0445451641,
+        "moving_time_min":59.4166666667,
+        "elevation_gain_ft":138.779532,
+        "average_speed_mps":3.18,
+        "average_pace":"8:26",
+        "average_heartrate":148.4
+    },
+    {
         "date":"2026-10-21T17:58:36.000Z",
         "id":20680883089,
         "name":"Shakeout Run",
