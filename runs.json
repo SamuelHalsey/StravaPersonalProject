@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-10-27T09:00:39.000Z",
+        "id":20750962490,
+        "name":"Easy morning run",
+        "distance_miles":3.0015947526,
+        "moving_time_min":25.8,
+        "elevation_gain_ft":57.086616,
+        "average_speed_mps":3.121,
+        "average_pace":"8:35",
+        "average_heartrate":133.8
+    },
+    {
         "date":"2026-10-24T08:30:36.000Z",
         "id":20712999868,
         "name":"Morning Run SUB 1 HOUR 7 MILER",
