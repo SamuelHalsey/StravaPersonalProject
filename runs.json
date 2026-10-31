@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-10-30T18:41:40.000Z",
+        "id":20796723945,
+        "name":"Shakeout run",
+        "distance_miles":2.0459882917,
+        "moving_time_min":19.5333333333,
+        "elevation_gain_ft":32.8084,
+        "average_speed_mps":2.809,
+        "average_pace":"9:32",
+        "average_heartrate":113.4
+    },
+    {
         "date":"2026-10-28T17:42:49.000Z",
         "id":20771117943,
         "name":"Shake out run for vo2max tmrw \ud83d\ude24",
