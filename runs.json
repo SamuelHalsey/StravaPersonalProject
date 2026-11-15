@@ -1,5 +1,16 @@
 [
     {
+        "date":"2026-11-14T10:57:37.000Z",
+        "id":20987693502,
+        "name":"Saturday long run",
+        "distance_miles":10.002208987,
+        "moving_time_min":90.6666666667,
+        "elevation_gain_ft":139.763784,
+        "average_speed_mps":2.959,
+        "average_pace":"9:03",
+        "average_heartrate":133.0
+    },
+    {
         "date":"2026-11-12T18:04:07.000Z",
         "id":20966158926,
         "name":"Norwegians \ud83d\ude01",
